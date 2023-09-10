@@ -15,7 +15,7 @@ const configuration = {
 
 let peerConnection = null;
 let micStream = null;
-let screenCaptureStream = null;
+let localStream = null;
 let remoteStream = null;
 let roomDialog = null;
 let roomId = null;
@@ -33,35 +33,17 @@ async function createRoom() {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
   const db = firebase.firestore();
+  const roomRef = await db.collection('rooms').doc();
 
   console.log('Create PeerConnection with configuration: ', configuration);
   peerConnection = new RTCPeerConnection(configuration);
 
   registerPeerConnectionListeners();
 
-  // Add code for creating a room here
-	const offer = await peerConnection.createOffer();
-	await peerConnection.setLocalDescription(offer);
-
-	const roomWithOffer = {
-		offer: {
-			type: offer.type,
-			sdp: offer.sdp
-		}
-	}
-	const roomRef = await db.collection('rooms').add(roomWithOffer);
-	const roomId = roomRef.id;
-	document.querySelector('#currentRoom').innerText = `Current room is ${roomId} - You are the caller!`
-  // Code for creating room above
-  
   localStream.getTracks().forEach(track => {
     peerConnection.addTrack(track, localStream);
   });
 
-  // Code for creating a room below
-  // Code for creating a room above
-
-  // Code for collecting ICE candidates below
 
   const callerCandidatesCollection = roomRef.collection('callerCandidates');
 
@@ -74,7 +56,27 @@ async function createRoom() {
     callerCandidatesCollection.add(event.candidate.toJSON());
   });
 
-  // Code for collecting ICE candidates above
+
+  // Add code for creating a room here
+	const offer = await peerConnection.createOffer();
+	await peerConnection.setLocalDescription(offer);
+
+	const roomWithOffer = {
+    'offer': {
+      type: offer.type,
+      sdp: offer.sdp,
+    },
+  };
+
+
+	const roomId = roomRef.id;
+  await roomRef.set(roomWithOffer);
+
+
+	document.querySelector('#currentRoom').innerText = `Current room is ${roomId} - You are the caller!`
+
+
+  
 
   peerConnection.addEventListener('track', event => {
     console.log('Got remote track:', event.streams[0]);
@@ -97,6 +99,7 @@ async function createRoom() {
 
   // Listen for remote ICE candidates below
   roomRef.collection('calleeCandidates').onSnapshot(snapshot => {
+
     snapshot.docChanges().forEach(async change => {
       if (change.type === 'added') {
         let data = change.doc.data();
@@ -134,9 +137,6 @@ async function joinRoomById(roomId) {
     console.log('Create PeerConnection with configuration: ', configuration);
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
-    localStream.getTracks().forEach(track => {
-      peerConnection.addTrack(track, localStream);
-    });
 
     // Code for collecting ICE candidates below
     const calleeCandidatesCollection = roomRef.collection('calleeCandidates');
@@ -192,6 +192,13 @@ async function joinRoomById(roomId) {
   }
 }
 
+async function sendTrack() {
+    localStream.getTracks().forEach(track => {
+      console.log('add local track');
+      peerConnection.addTrack(track, localStream);
+    });
+}
+
 
 async function getMic(e) {
   const stream = await navigator.mediaDevices.getUserMedia(
@@ -199,7 +206,8 @@ async function getMic(e) {
 
   micStream  = stream
 
-  console.log('Stream:', document.querySelector('#localVideo').srcObject);
+
+  console.log('Stream:', document.querySelector('#micStream').srcObject);
   document.querySelector('#cameraBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = false;
   document.querySelector('#createBtn').disabled = false;
@@ -220,10 +228,10 @@ async function getSceenCapture(e) {
   document.querySelector('#remoteVideo').srcObject = remoteStream;
 
   console.log('Stream:', document.querySelector('#localVideo').srcObject);
-  document.querySelector('#cameraBtn').disabled = true;
-  //document.querySelector('#joinBtn').disabled = false;
-  //document.querySelector('#createBtn').disabled = false;
-  //document.querySelector('#hangupBtn').disabled = false;
+  document.querySelector('#screenShareBtn').disabled = true;
+  document.querySelector('#joinBtn').disabled = false;
+  document.querySelector('#createBtn').disabled = false;
+  document.querySelector('#hangupBtn').disabled = false;
 }
 
 async function hangUp(e) {
@@ -242,9 +250,10 @@ async function hangUp(e) {
 
   document.querySelector('#localVideo').srcObject = null;
   document.querySelector('#remoteVideo').srcObject = null;
-  document.querySelector('#cameraBtn').disabled = false;
-  document.querySelector('#joinBtn').disabled = true;
-  document.querySelector('#createBtn').disabled = true;
+  document.querySelector('#micBtn').disabled = false;
+  document.querySelector('#screenShareBtn').disabled = false;
+  document.querySelector('#joinBtn').disabled = false;
+  document.querySelector('#createBtn').disabled = false;
   document.querySelector('#hangupBtn').disabled = true;
   document.querySelector('#currentRoom').innerText = '';
 
