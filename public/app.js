@@ -41,6 +41,7 @@ async function createRoom() {
   registerPeerConnectionListeners();
 
   localStream.getTracks().forEach(track => {
+    console.log('add localtrack');
     peerConnection.addTrack(track, localStream);
   });
 
@@ -137,6 +138,10 @@ async function joinRoomById(roomId) {
     console.log('Create PeerConnection with configuration: ', configuration);
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
+    localStream.getTracks().forEach(track => {
+    console.log('add localtrack');
+    peerConnection.addTrack(track, localStream);
+    });
 
     // Code for collecting ICE candidates below
     const calleeCandidatesCollection = roomRef.collection('calleeCandidates');
@@ -188,15 +193,7 @@ async function joinRoomById(roomId) {
       });
     });
 
-    // Listening for remote ICE candidates above
   }
-}
-
-async function sendTrack() {
-    localStream.getTracks().forEach(track => {
-      console.log('add local track');
-      peerConnection.addTrack(track, localStream);
-    });
 }
 
 
