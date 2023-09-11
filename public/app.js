@@ -69,15 +69,12 @@ async function createRoom() {
     },
   };
 
-
-	const roomId = roomRef.id;
+  const roomId = roomRef.id;
   await roomRef.set(roomWithOffer);
 
 
-	document.querySelector('#currentRoom').innerText = `Current room is ${roomId} - You are the caller!`
+  document.querySelector('#currentRoom').innerText = `Current room is ${roomId} - You are the caller!`
 
-
-  
 
   peerConnection.addEventListener('track', event => {
     console.log('Got remote track:', event.streams[0]);
@@ -201,8 +198,10 @@ async function getMic(e) {
   const stream = await navigator.mediaDevices.getUserMedia(
       {video: false, audio: true});
 
-  micStream  = stream
-
+  document.querySelector('#localVideo').srcObject = stream;
+  localStream = stream;
+  remoteStream = new MediaStream();
+  document.querySelector('#remoteVideo').srcObject = remoteStream;
 
   console.log('Stream:', document.querySelector('#micStream').srcObject);
   document.querySelector('#cameraBtn').disabled = true;
