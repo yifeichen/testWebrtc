@@ -13,6 +13,43 @@ const configuration = {
   iceCandidatePoolSize: 10,
 };
 
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB33F6VBOqfKJRyusNJ-R6VLxk4V_8sHOE",
+  authDomain: "fir-rtc-44977.firebaseapp.com",
+  projectId: "fir-rtc-44977",
+  storageBucket: "fir-rtc-44977.appspot.com",
+  messagingSenderId: "469641611335",
+  appId: "1:469641611335:web:e1557ea35c9eae18fb4962",
+  measurementId: "G-RHY1ZRC8R3"
+};
+firebase.initializeApp(firebaseConfig);
+// Initialize the FirebaseUI Widget using Firebase.
+const ui = new firebaseui.auth.AuthUI(firebase.auth());
+// Disable auto-sign in.
+//ui.disableAutoSignIn();
+
+const uiConfig = {
+  callbacks: {
+    signInSuccessWithAuthResult(authResult, redirectUrl) {
+      return false;
+    },
+    uiShown() {
+      //document.getElementById('loader').style.display = 'none';
+    },
+  },
+  signInFlow: 'popup',
+  //signInSuccessUrl: '/',
+  signInOptions: [
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+  ],
+};
+
+
+
+
 let peerConnection = null;
 let micStream = null;
 let localStream = null;
@@ -27,6 +64,7 @@ function init() {
   document.querySelector('#createBtn').addEventListener('click', createRoom);
   document.querySelector('#joinBtn').addEventListener('click', joinRoom);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
+  ui.start('#firebaseui-auth-container', uiConfig);
 }
 
 async function createRoom() {
@@ -59,10 +97,10 @@ async function createRoom() {
 
 
   // Add code for creating a room here
-	const offer = await peerConnection.createOffer();
-	await peerConnection.setLocalDescription(offer);
+  const offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
 
-	const roomWithOffer = {
+  const roomWithOffer = {
     'offer': {
       type: offer.type,
       sdp: offer.sdp,
@@ -71,7 +109,6 @@ async function createRoom() {
 
   const roomId = roomRef.id;
   await roomRef.set(roomWithOffer);
-
 
   document.querySelector('#currentRoom').innerText = `Current room is ${roomId} - You are the caller!`
 
@@ -98,7 +135,7 @@ async function createRoom() {
   // Listen for remote ICE candidates below
   roomRef.collection('calleeCandidates').onSnapshot(snapshot => {
 
-    snapshot.docChanges().forEach(async change => {
+  snapshot.docChanges().forEach(async change => {
       if (change.type === 'added') {
         let data = change.doc.data();
         console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
