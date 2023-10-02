@@ -14,7 +14,6 @@ const configuration = {
 };
 
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyB33F6VBOqfKJRyusNJ-R6VLxk4V_8sHOE",
   authDomain: "fir-rtc-44977.firebaseapp.com",
@@ -33,6 +32,7 @@ const ui = new firebaseui.auth.AuthUI(firebase.auth());
 const uiConfig = {
   callbacks: {
     signInSuccessWithAuthResult(authResult, redirectUrl) {
+      document.getElementById("buttons").classList.remove('disabledDiv');
       return false;
     },
     uiShown() {
@@ -48,8 +48,6 @@ const uiConfig = {
 };
 
 
-
-
 let peerConnection = null;
 let micStream = null;
 let localStream = null;
@@ -61,17 +59,33 @@ function init() {
   document.querySelector('#micBtn').addEventListener('click', getMic);
   document.querySelector('#screenShareBtn').addEventListener('click', getSceenCapture);
   document.querySelector('#hangupBtn').addEventListener('click', hangUp);
-  document.querySelector('#createBtn').addEventListener('click', createRoom);
+  document.querySelector('#createBtn').addEventListener('click', createRoomid);
   document.querySelector('#joinBtn').addEventListener('click', joinRoom);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
   ui.start('#firebaseui-auth-container', uiConfig);
+  document.getElementById("buttons").classList.add('disabledDiv');
 }
 
-async function createRoom() {
+function createRoomid() {
+  document.querySelector('#createBtn').disabled = true;
+  document.querySelector('#joinBtn').disabled = true;
+
+  document.querySelector('#confirmJoinBtn').
+      addEventListener('click', async () => {
+        roomId = document.querySelector('#room-id').value;
+        console.log('Join room: ', roomId);
+        document.querySelector(
+            '#currentRoom').innerText = `Current room is ${roomId} - You are the caller!`;
+        await createRoom(roomId);
+      }, {once: true});
+  roomDialog.open();
+}
+
+async function createRoom(roomId) {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
   const db = firebase.firestore();
-  const roomRef = await db.collection('rooms').doc();
+  const roomRef = await db.collection('rooms').doc(roomId);
 
   console.log('Create PeerConnection with configuration: ', configuration);
   peerConnection = new RTCPeerConnection(configuration);
@@ -107,10 +121,10 @@ async function createRoom() {
     },
   };
 
-  const roomId = roomRef.id;
+  //const roomId = roomRef.id;
   await roomRef.set(roomWithOffer);
 
-  document.querySelector('#currentRoom').innerText = `Current room is ${roomId} - You are the caller!`
+  //document.querySelector('#currentRoom').innerText = `Current room is ${roomId} - You are the caller!`
 
 
   peerConnection.addEventListener('track', event => {

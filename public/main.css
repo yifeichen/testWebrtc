@@ -88,3 +88,8 @@ div#videos > video {
     display: block;
     margin: 1em;
 }
+
+.disabledDiv {
+    pointer-events: none;
+    opacity: 0.4;
+}

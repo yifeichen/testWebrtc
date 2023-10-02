@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/6.3.3/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/6.3.3/firebase-firestore.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
+    <!-- <script defer src="/__/firebase/init.js"></script>  -->
 
     <link rel="stylesheet" type="text/css" href="main.css">
     <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
@@ -27,8 +27,8 @@
     />
 </head>
 <body>
-<div id="firebaseui-auth-container"></div>
 <h1>screen capture sharing</h1>
+<div id="firebaseui-auth-container"></div>
 <div id="buttons">
     <button class="mdc-button mdc-button--raised" id="micBtn">
         <i class="material-icons mdc-button__icon" aria-hidden="true">mic</i>
@@ -66,12 +66,12 @@
      aria-describedby="my-dialog-content">
     <div class="mdc-dialog__container">
         <div class="mdc-dialog__surface">
-            <h2 class="mdc-dialog__title" id="my-dialog-title">Join room</h2>
+            <h2 class="mdc-dialog__title" id="my-dialog-title">Room ID</h2>
             <div class="mdc-dialog__content" id="my-dialog-content">
-                Enter ID for room to join:
+                Enter ID for room:
                 <div class="mdc-text-field">
                     <input type="text" id="room-id" class="mdc-text-field__input">
-                    <label class="mdc-floating-label" for="my-text-field">Room ID</label>
+                    <label class="mdc-floating-label" for="my-text-field"></label>
                     <div class="mdc-line-ripple"></div>
                 </div>
             </div>
@@ -81,7 +81,7 @@
                 </button>
                 <button id="confirmJoinBtn" type="button" class="mdc-button mdc-dialog__button"
                         data-mdc-dialog-action="yes">
-                    <span class="mdc-button__label">Join</span>
+                    <span class="mdc-button__label">confirm</span>
                 </button>
             </footer>
         </div>
